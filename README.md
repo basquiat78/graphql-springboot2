@@ -558,3 +558,48 @@ mutation {
 ```
 
 ![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/like-controller/capture/capture3.png)
+
+
+내가 질의할 때 보고자 하는 정보를 정의하면 그 정보만 보여주게 되어 있다.
+
+일단 뭔가가 좀 부족해 보이니 앨범 정보를 한번 넣어보자.
+
+3. 앨범 정보를 생성해 보자.
+
+```
+{
+    musicians {
+        id
+        name
+        
+    }
+}
+
+```
+
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/like-controller/capture/capture4.png)
+
+정보를 보니 Charlie Parker의 아이디는 1이다.
+
+그럼 다음과 같이 앨범을 한번 넣어보자.
+
+
+```
+mutation {
+    createAlbum(id:1, title:"With String", releasedYear:"1950") {
+        title
+        releasedYear
+        musician {
+        	name
+        	genre
+        }
+    }
+}
+
+```
+
+이젠 익숙해 질 듯 한데 저 정보만을 보면 어떤 값이 리턴되어 돌아올지 알 수 있다.
+
+아래 그림처럼
+
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/like-controller/capture/capture5.png)
