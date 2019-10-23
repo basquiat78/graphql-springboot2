@@ -1,0 +1,22 @@
+schema {
+	query: Query
+	mutation: Mutation
+}
+
+type Musician {
+	id: ID
+	name: String
+	genre: String
+	albums: [Album]
+}
+
+type Query {
+	musicians: [Musician]
+	musician(id: ID): Musician
+}
+
+type Mutation {
+	createMusician(name: String!, genre: String!): Musician!
+	updateMusician(id: ID!, name: String!, genre: String!): Musician!
+	deleteMusician(id: ID!): Boolean
+}

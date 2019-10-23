@@ -1,0 +1,17 @@
+type Album {
+	id: ID
+	title: String
+	releasedYear: String
+	musician: Musician
+}
+
+extend type Query {
+	albums: [Album]
+	album(id: ID): Album!
+}
+
+extend type Mutation {
+	createAlbum(id: ID, title: String!, releasedYear: String!): Album
+	updateAlbum(id: ID, title: String!, releasedYear: String!): Album!
+	deleteAlbum(id: ID): Boolean
+}
