@@ -517,10 +517,44 @@ mutation {
 ```
 자 저렇게만 하면 된다.
 
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/like-controller/capture/capture1.png)
+    
+        
+    
+    
 2. 이제 뮤지션의 정보를 한번 가져와 보자
 
 ```
-
+{
+    musicians {
+        name
+        genre
+        albums {
+        	title
+        	releasedYear
+        }
+  
+    }
+}
 
 
 ```
+
+일단 앨범 정보를 생성하지 않았기 때문에 빈 배열로 나온다.
+
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/like-controller/capture/capture2.png)
+
+
+어 나는 그냥 이름만 알고 싶어라면 
+
+```
+{
+    musicians {
+        name
+    }
+}
+
+
+```
+
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/like-controller/capture/capture3.png)
