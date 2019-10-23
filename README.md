@@ -603,3 +603,42 @@ mutation {
 아래 그림처럼
 
 ![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/like-controller/capture/capture5.png)
+
+
+자 이제 처음으로 돌아가서
+
+뮤지션의 정보를 가져와 보자
+
+```
+{
+    musician(id:1) {
+        name
+        genre
+        albums{
+        	title
+        }
+    }
+}
+
+```
+
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/like-controller/capture/capture6.png)
+
+
+```
+{
+    musician(id:1) {
+        name
+        genre
+        albums{
+        	title
+        	releasedYear
+        }
+    }
+}
+
+```
+
+정보를 가져오는데 앨범의 릴리즈 년도까지 보고 싶다면
+
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/like-controller/capture/capture7.png)
