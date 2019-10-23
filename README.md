@@ -113,4 +113,14 @@ facebook이 저렇게 만들어 놨다.
 
 [GraphQL과 RESTful API](https://www.holaxprogramming.com/2018/01/20/graphql-vs-restful-api/)
 
+## Next Episode
 
+Spring boot와 관련 정보를 찾다 보니 3가지 방식으로 구현할 수 있다.
+
+기존의 방식과 controller없이 Resolver를 이용한 방식 (그래서 약간 이질감이 있다) 그리고 어노테이션을 이용한 방식이다.
+
+각기 장점이 있어 보이는데 그 중에 첫 번째 브랜치인 like-controller는 기존의 방식을 유지하는 방식으로 작성한 예제이다.
+
+최종 목표는 저 3가지 방식 구현과 현재 Query, Mutation을 적용한 예제만 있지만 차후 Subscription 적용 및 WebFlux를 활용하는 것이다.
+
+그외 enum같은 것도 제공하는데 이것저것 다 적용해서 최종 완성하는게 목표이다. 
