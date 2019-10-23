@@ -675,3 +675,15 @@ mutation {
 ```
 
 ![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/like-controller/capture/capture9.png)
+
+
+삭제는 생략하겠다. 어짜피 위 방식을 이해했다면 나머지도 마찬가지이다.
+
+
+## At A Glance
+
+일단 이 방식은 나름대로의 익숙함이 있어서 작성하는데는 그리 오래 걸리지 않았다.
+
+하지만 DataFetcher를 이용하는 경우 각 질의수만큼 늘어나는 클래스가 사실 좀 불편하다.
+
+물론 이렇게 하면서 생기는 장점도 있긴 하지만 그 다음은 Resolver를 이용해 보겠다.
