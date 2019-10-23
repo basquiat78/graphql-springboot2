@@ -482,7 +482,7 @@ id를 던지면 해당 id에 해당하는 뮤지션을 가져오는 구조이다
 그래서 Body -> raw 를 선택해서 날려보고자 한다.
 
 
-1. 일단 뮤지션 정보를 넣어보자.
+일단 뮤지션 정보를 넣어보자.
 
 ```
 mutation {
@@ -522,7 +522,7 @@ mutation {
         
     
     
-2. 이제 뮤지션의 정보를 한번 가져와 보자
+이제 뮤지션의 정보를 한번 가져와 보자
 
 ```
 {
@@ -642,3 +642,36 @@ mutation {
 정보를 가져오는데 앨범의 릴리즈 년도까지 보고 싶다면
 
 ![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/like-controller/capture/capture7.png)
+
+
+업데이트도 해봐야지?
+
+```
+mutation {
+    updateMusician(id: 2, name:"", genre:"jazzzzzzz") {
+        name
+        genre
+    }
+}
+
+```
+
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/like-controller/capture/capture8.png)
+
+그리고 실제로 제대로 업뎃이 됬는지 확인해 보자.
+
+```
+{
+    musician(id:2) {
+        name
+        genre
+        albums{
+        	title
+        	releasedYear
+        }
+    }
+}
+
+```
+
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/like-controller/capture/capture9.png)
