@@ -129,3 +129,5 @@ Spring boot와 관련 정보를 찾다 보니 3가지 방식으로 구현할 수
 ## complete Branch
 
 [like-controller](https://github.com/basquiat78/graphql-springboot2/tree/like-controller)
+    
+[use-resolver -> readme 작성중..](https://github.com/basquiat78/graphql-springboot2/tree/use-resolver)
