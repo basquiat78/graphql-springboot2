@@ -19,3 +19,12 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
+
+# graphql config
+# default endpoint 'graphql'
+# if you change endpoint, graphql.servlet.mapping -> definition your endpoint
+graphql:
+  servlet:
+       mapping: /music
+       enabled: true
+       corsEnabled: true

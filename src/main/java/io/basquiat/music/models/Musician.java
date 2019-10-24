@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -41,7 +42,7 @@ public class Musician {
 	/** 뮤지션의 주요 음악 장르 */
 	private String genre;
 	
-	@OneToMany(cascade=CascadeType.ALL, mappedBy="musician")
+	@OneToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL, mappedBy="musician")
 	private List<Album> albums;
 
 }
