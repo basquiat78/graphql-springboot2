@@ -1,4 +1,4 @@
-package io.basquiat.music.resolver;
+package io.basquiat.music.resolver.album;
 
 import java.util.List;
 
@@ -8,9 +8,7 @@ import org.springframework.stereotype.Component;
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 
 import io.basquiat.music.models.Album;
-import io.basquiat.music.models.Musician;
 import io.basquiat.music.repo.AlbumRepository;
-import io.basquiat.music.repo.MusicianRepository;
 
 /**
  * 
@@ -32,33 +30,10 @@ import io.basquiat.music.repo.MusicianRepository;
  * 
  */
 @Component
-public class QueryResolver implements GraphQLQueryResolver {
-
-	@Autowired
-	private MusicianRepository musicianRepository;
+public class AlbumQueryResolver implements GraphQLQueryResolver {
 
 	@Autowired
 	private AlbumRepository albumRepository;
-	
-	/**
-	 * get musician by id
-	 * 
-	 * @param id
-	 * @return Musician
-	 */
-	public Musician musician(long id) {
-		return musicianRepository.findById(id).orElseGet(Musician::new);
-	}
-	
-	/**
-	 * 
-	 * get musician list
-	 * 
-	 * @return List<Musician>
-	 */
-	public List<Musician> musicians() {
-		return musicianRepository.findAll();
-	}
 	
 	/**
 	 * get album by id

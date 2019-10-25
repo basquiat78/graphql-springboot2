@@ -1,4 +1,4 @@
-package io.basquiat.music.resolver;
+package io.basquiat.music.resolver.musician;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -7,9 +7,7 @@ import org.springframework.util.StringUtils;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 
-import io.basquiat.music.models.Album;
 import io.basquiat.music.models.Musician;
-import io.basquiat.music.repo.AlbumRepository;
 import io.basquiat.music.repo.MusicianRepository;
 
 /**
@@ -32,13 +30,10 @@ import io.basquiat.music.repo.MusicianRepository;
  * 
  */
 @Component
-public class MutationResolver implements GraphQLMutationResolver {
+public class MusicianMutationResolver implements GraphQLMutationResolver {
 
 	@Autowired
 	private MusicianRepository musicianRepository;
-
-	@Autowired
-	private AlbumRepository albumRepository;
 	
 	/**
 	 * create musician
@@ -89,58 +84,6 @@ public class MutationResolver implements GraphQLMutationResolver {
 	public boolean deleteMusician(long id) {
 		musicianRepository.deleteById(id);
 		return musicianRepository.existsById(id);
-	}
-	
-	/**
-	 * 
-	 * create album
-	 * 
-	 * @param id
-	 * @param title
-	 * @param releasedYear
-	 * @return Album
-	 */
-	public Album createAlbum(long id, String title, String releasedYear) {
-		Musician musician = musicianRepository.findById(id).orElseGet(Musician::new);
-		Album album = Album.builder()
-						   .musician(musician)
-						   .title(title)
-						   .releasedYear(releasedYear)
-						   .build();
-		return albumRepository.save(album);
-	}
-
-	/**
-	 * update album
-	 * 
-	 * @param id
-	 * @param title
-	 * @param releasedYear
-	 * @return Album
-	 */
-	@Transactional
-	public Album updateAlbum(long id, String title, String releasedYear) {
-		Album album = albumRepository.findById(id).orElseGet(Album::new);
-		// dirty checking
-		if(!StringUtils.isEmpty(title)) {
-			album.setTitle(title);
-		}
-		
-		if(!StringUtils.isEmpty(releasedYear)) {
-			album.setReleasedYear(releasedYear);
-		}
-		return album;
-	}
-	
-	/**
-	 * delete album
-	 * 
-	 * @param id
-	 * @return boolean
-	 */
-	public boolean deleteAlbum(long id) {
-		albumRepository.deleteById(id);
-		return albumRepository.existsById(id);
 	}
 	
 }
