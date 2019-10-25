@@ -482,6 +482,425 @@ curl  -X POST  -H "Content-Type: application/json; charset=utf-8"  -d '{ "query"
 
 완료가 되면 그때 시도를....
 
+
+## 에러 ???
+
+이런 걸 생각해보자.
+
+앨범이나 뮤지션 정보를 업데이트할때 또는 앨범의 경우에는 정보 생성시 뮤지션의 아이디를 함께 넘기는 유효하지 않거나 존재하지 않는 id를 넘겼다면 어떻게 응답을 할까??
+
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/use-resolver/capture/capture5.png)
+
+이미지처
+
+```
+{
+    "data": {
+        "createAlbum": null
+    },
+    "errors": [
+        {
+            "message": "Internal Server Error(s) while executing query",
+            "path": null,
+            "extensions": null
+        }
+    ]
+}
+
+```
+
+Internal Server Error(s) while executing query <--를 넘길 것이다.
+
+하지만 클라이언트 입장에서는 에러가 왜 났는지에 대한 이유를 알 수가 없다.
+
+NPE에 대한 에러 처리를 할 필요가 있기 때문에 에러를 해결해야 한다.
+
+## 고전적인 방식의 에러 처리
+
+다음 클래스를 생성할 것이다.
+
+GraphqlNotFoundException.java
+
+```
+
+package io.basquiat.exception;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import graphql.ErrorType;
+import graphql.GraphQLError;
+import graphql.language.SourceLocation;
+
+/**
+ * 
+ * created by basquiat
+ * 
+ * album id가 없을 때 메세지를 명확하게 정의해서 던진다.
+ * 
+ */
+public class GraphqlNotFoundException extends RuntimeException implements GraphQLError {
+
+	private static final long serialVersionUID = -6856095627314499827L;
+
+	private Map<String, Object> extensions = new HashMap<>();
+
+    public GraphqlNotFoundException(String message, long id) {
+        super(message);
+        extensions.put("not found Anything by id, maybe id doesn't exit", id);
+    }
+
+    @Override
+    public List<SourceLocation> getLocations() {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> getExtensions() {
+        return extensions;
+    }
+
+    @Override
+    public ErrorType getErrorType() {
+        return ErrorType.DataFetchingException;
+    }
+
+}
+
+```
+
+간단하게 메세지와 id를 받아서 에러 메세지를 위임할 것이다.
+
+
+
+수정한 MusicianMutationResolver.java
+
+```
+package io.basquiat.music.resolver.musician;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
+import com.coxautodev.graphql.tools.GraphQLMutationResolver;
+
+import io.basquiat.exception.GraphqlNotFoundException;
+import io.basquiat.music.models.Musician;
+import io.basquiat.music.repo.MusicianRepository;
+
+/**
+ * 
+ * created by basquiat
+ * 
+ * Mutation Resolver
+ * 
+ * 필드명을 작성하 방식이 baeldung.com에 명시되어 있다.
+ * 
+ * 만일 스키마에 musicians, musician이라면 리턴되는 타입에 따라 3가지 방식을 적용할 수 있다.
+ * 
+ * 1. musicians
+ * 2. isMusicians 만일 boolean을 리턴한다면
+ * 3. getMusicians
+ * 
+ * 여기서는 스키마에 정의된 필드 명으로 작성한다. 
+ * 
+ * @see https://www.baeldung.com/spring-graphql
+ * 
+ */
+@Component
+public class MusicianMutationResolver implements GraphQLMutationResolver {
+
+	@Autowired
+	private MusicianRepository musicianRepository;
+	
+	/**
+	 * create musician
+	 * 
+	 * @param name
+	 * @param genre
+	 * @return Musician
+	 */
+	public Musician createMusician(String name, String genre) {
+		Musician musician = Musician.builder()
+									.name(name)
+									.genre(genre)
+									.build();
+		return musicianRepository.save(musician);
+	}
+	
+	/**
+	 * 
+	 * update musician
+	 * 
+	 * @param id
+	 * @param name
+	 * @param genre
+	 * @return Musician
+	 */
+	@Transactional
+	public Musician updateMusician(long id, String name, String genre) {
+		// id로 뮤지션을 찾아온다.
+		Musician musician = musicianRepository.findById(id).orElseGet(Musician::new);
+		if(musician.getName() == null) {
+			throw new GraphqlNotFoundException("not found musician by id, it doesn't update musician", id);
+		}
+		// dirty checking
+		if(!StringUtils.isEmpty(name)) {
+			musician.setName(name);
+		}
+
+		if(!StringUtils.isEmpty(genre)) {
+			musician.setGenre(genre);
+		}
+		return musician;
+	}
+
+	/**
+	 * 
+	 * delete musician
+	 * 
+	 * @param id
+	 * @return boolean
+	 */
+	public boolean deleteMusician(long id) {
+		musicianRepository.deleteById(id);
+		return musicianRepository.existsById(id);
+	}
+	
+}
+
+
+```
+
+
+
+근데 문제는 다음과 같은 응답을 받는다.
+
+
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/use-resolver/capture/capture5.png)
+
+```
+메세지 하단부의 정보
+
+"locations": [
+                {
+                    "line": 2,
+                    "column": 5,
+                    "sourceName": null
+                }
+            ],
+            "extensions": {
+                "not found musician by id, maybe id doesn't exit": 1
+            },
+            "errorType": "DataFetchingException"
+
+```
+
+message에서는 그 이유가 잘 설명이 나와서 좋긴 한데 중간에 어마무시한 라인의 exception stackTrace정보도 함께 나온다.
+
+테스트 기준으로 무려 570에 해당하는 정보가 전부 나온다.
+
+
+## 그럼 어떻게??
+
+찾은 정보는 GraphQLError를 구현한 GraphQLErrorAdapter를 만들고 그것을 통해서 기본적인 GraphQLErrorHandler를 재정의해서 사용한다는 것을 찾았다.
+
+
+GraphQLErrorAdapter.java
+
+```
+package io.basquiat.exception.adapter;
+
+import java.util.List;
+import java.util.Map;
+
+import graphql.ErrorType;
+import graphql.ExceptionWhileDataFetching;
+import graphql.GraphQLError;
+import graphql.language.SourceLocation;
+
+/**
+ * 
+ * created by basquiat
+ * 
+ * GraphQLError를 구현한 어댑터를 생성한다. 
+ * 
+ *
+ */
+public class GraphQLErrorAdapter implements GraphQLError {
+
+	private static final long serialVersionUID = 6820355151702777990L;
+
+	private GraphQLError error;
+
+    public GraphQLErrorAdapter(GraphQLError error) {
+        this.error = error;
+    }
+
+    @Override
+    public Map<String, Object> getExtensions() {
+        return error.getExtensions();
+    }
+
+    @Override
+    public List<SourceLocation> getLocations() {
+        return error.getLocations();
+    }
+
+    @Override
+    public ErrorType getErrorType() {
+        return error.getErrorType();
+    }
+
+    @Override
+    public List<Object> getPath() {
+        return error.getPath();
+    }
+
+    @Override
+    public Map<String, Object> toSpecification() {
+        return error.toSpecification();
+    }
+
+    @Override
+    public String getMessage() {
+        return (error instanceof ExceptionWhileDataFetching) ? ((ExceptionWhileDataFetching) error).getException().getMessage() : error.getMessage();
+    }
+
+}
+
+
+```
+
+
+GraphQLErrorConfiguration.java
+
+```
+package io.basquiat.config;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import graphql.ExceptionWhileDataFetching;
+import graphql.GraphQLError;
+import graphql.servlet.GraphQLErrorHandler;
+import io.basquiat.exception.adapter.GraphQLErrorAdapter;
+
+/**
+ * 
+ * created by basquiat
+ * 
+ * GraphQLErrorHandler를 재정의 하는 설정 클래
+ *
+ */
+@Configuration
+public class GraphQLErrorConfiguration {
+
+	@Bean
+	public GraphQLErrorHandler errorHandler() {
+		return new GraphQLErrorHandler() {
+			@Override
+			public List<GraphQLError> processErrors(List<GraphQLError> errors) {
+				List<GraphQLError> clientErrors = errors.stream()
+														.filter(this::isClientError)
+														.collect(Collectors.toList());
+
+				List<GraphQLError> serverErrors = errors.stream()
+														.filter(e -> !isClientError(e))
+														.map(GraphQLErrorAdapter::new)
+														.collect(Collectors.toList());
+
+				List<GraphQLError> e = new ArrayList<>();
+				e.addAll(clientErrors);
+				e.addAll(serverErrors);
+				return e;
+			}
+
+			protected boolean isClientError(GraphQLError error) {
+				return !(error instanceof ExceptionWhileDataFetching || error instanceof Throwable);
+			}
+		};
+	}
+	
+}
+
+
+```
+
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/use-resolver/capture/capture5.png)
+
+
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/use-resolver/capture/wow.gif)
+
+
+
+
+일단 다음 graphql-java-servlet에 존재하는 
+
+```
+package graphql.servlet;
+
+import graphql.ExceptionWhileDataFetching;
+import graphql.GraphQLError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * @author Andrew Potter
+ */
+public class DefaultGraphQLErrorHandler implements GraphQLErrorHandler {
+
+    public static final Logger log = LoggerFactory.getLogger(DefaultGraphQLErrorHandler.class);
+
+    @Override
+    public List<GraphQLError> processErrors(List<GraphQLError> errors) {
+        final List<GraphQLError> clientErrors = filterGraphQLErrors(errors);
+        if (clientErrors.size() < errors.size()) {
+
+            // Some errors were filtered out to hide implementation - put a generic error in place.
+            clientErrors.add(new GenericGraphQLError("Internal Server Error(s) while executing query"));
+
+            errors.stream()
+                .filter(error -> !isClientError(error))
+                .forEach(error -> {
+                    if(error instanceof Throwable) {
+                        log.error("Error executing query!", (Throwable) error);
+                    } else {
+                        log.error("Error executing query ({}): {}", error.getClass().getSimpleName(), error.getMessage());
+                    }
+                });
+        }
+
+        return clientErrors;
+    }
+
+    protected List<GraphQLError> filterGraphQLErrors(List<GraphQLError> errors) {
+        return errors.stream()
+            .filter(this::isClientError)
+            .collect(Collectors.toList());
+    }
+
+    protected boolean isClientError(GraphQLError error) {
+        if (error instanceof ExceptionWhileDataFetching) {
+            return ((ExceptionWhileDataFetching) error).getException() instanceof GraphQLError;
+        }
+        return !(error instanceof Throwable);
+    }
+}
+
+```
+위 코드를 보면 발생한 모든 에러의 정보들을 리스트에 담아 내고 있다. 하지만 GraphQLErrorConfiguration.java 코드를 보면 GraphQLErrorAdapter.java에서 override한 녀석들만 리스트에 담게 되어 있다.
+
+
 ## At A Glance
 
 작성한 시점에서 query, mutation resolver를 리소스 별로 나눠서 작성하는 것이 더 좋을 것 같아서 현재는 예제 코드와는 달리 분리해서 작성을 완성했다.
@@ -490,8 +909,7 @@ curl  -X POST  -H "Content-Type: application/json; charset=utf-8"  -d '{ "query"
 
 현재까지는 에러에 대한 어떤 처리도 하지 않았다.
 
-아마도 에러가 나면 클라이언트에 불필요한 에러 정보가 보내질 것이 뻔한테 이 브랜치에서는 에러 핸들링을 해볼 생각이다.
+아마도 에러가 나면 클라이언트에 불필요한 에러 정보가 보내질 것이 뻔한테 이 브랜치에서는 에러 핸들링을 해볼 생각이다. (완료)
 
-예제에서도 GraphQL에러 처리하는 방식들이 있기 때문에 적용해 볼 생각이다.
-
-현재 진행중....
+다음은 어노테이션으로 스키마, api를 정의하는 방식을 구현할 예정이다.
+ 
