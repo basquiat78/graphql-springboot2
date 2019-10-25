@@ -905,6 +905,12 @@ public class DefaultGraphQLErrorHandler implements GraphQLErrorHandler {
 
 작성한 시점에서 query, mutation resolver를 리소스 별로 나눠서 작성하는 것이 더 좋을 것 같아서 현재는 예제 코드와는 달리 분리해서 작성을 완성했다.
 
+테스트시 뭔 짓을 해도 LazyInitializationException때문에 페치 전략을 @OneToMany에서 EAGER로 변경했었다.
+
+하지만 설정을 하나 빠뜨려 지금까지 삽질했다니...
+
+아직까지는 JPA하수인가 보다....
+
 ## Next 
 
 현재까지는 에러에 대한 어떤 처리도 하지 않았다.
