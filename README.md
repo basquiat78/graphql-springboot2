@@ -333,18 +333,18 @@ type Album {
 ```
 위와 같은 경우 musician 필드는 db를 기준으로 album테이블이 아닌 musician테이블에서 정보를 가져오게 되어 있다.
 
-현재 이 토이 프로젝트는 JPA의 @ManyToOne 을 통해 연관관계를 가지고 있지만 그렇지 않을 경우 해당 필드에 대한 정보를 Resolver를 통해서 명시적으로 표현하는 방법이 있다.
+현재 이 토이 프로젝트는 JPA의 @OneToMany, @ManyToOne 을 통해 Musician과 Album과의 연관관계를 가지고 있지만 그렇지 않을 경우 해당 필드에 대한 정보를 Resolver를 통해서 명시적으로 표현하는 방법이 있다.
 
 ```
-public class AlbomResolver implements GraphQLResolver<Albom> {
+public class AlbomResolver implements GraphQLResolver<Album> {
     
     @Autowired
     private MusicianRepository musicianRepository;
  
  	// 메소드 명칭을 정의 하는 방식에 의해
  	// getMusician이라고 정의해도 무방하다.
-    public Musician musician(Albom albom) {
-        return musicianRepository.getOne(albom.getMusician().getId());
+    public Musician musician(Album album) {
+        return musicianRepository.getOne(album.getMusician().getId());
     }
 }
 
