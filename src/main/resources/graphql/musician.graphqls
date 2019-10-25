@@ -6,6 +6,7 @@ schema {
 type Musician {
 	id: ID
 	name: String
+	age: Int @default(value: 0)
 	genre: String
 	albums: [Album]
 }
