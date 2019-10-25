@@ -399,4 +399,4 @@ mutation {
 ```
 
 
-![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/like-controller/capture/capture2.png)
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/use-resolver/capture/capture1.png)
