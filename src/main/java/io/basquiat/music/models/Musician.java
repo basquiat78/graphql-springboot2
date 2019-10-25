@@ -36,8 +36,11 @@ public class Musician {
 	@GeneratedValue(strategy= GenerationType.AUTO)
 	private long id;
 	
-	/** 뮤지션 이 */
+	/** 뮤지션 이름 */
 	private String name;
+	
+	/** 뮤지션 나이 */
+	private int age;
 	
 	/** 뮤지션의 주요 음악 장르 */
 	private String genre;
