@@ -7,6 +7,7 @@ import org.springframework.util.StringUtils;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 
+import io.basquiat.exception.GraphqlNotFoundException;
 import io.basquiat.music.models.Musician;
 import io.basquiat.music.repo.MusicianRepository;
 
@@ -63,6 +64,9 @@ public class MusicianMutationResolver implements GraphQLMutationResolver {
 	public Musician updateMusician(long id, String name, String genre) {
 		// id로 뮤지션을 찾아온다.
 		Musician musician = musicianRepository.findById(id).orElseGet(Musician::new);
+		if(musician.getName() == null) {
+			throw new GraphqlNotFoundException("not found musician by id, it doesn't update musician", id);
+		}
 		// dirty checking
 		if(!StringUtils.isEmpty(name)) {
 			musician.setName(name);

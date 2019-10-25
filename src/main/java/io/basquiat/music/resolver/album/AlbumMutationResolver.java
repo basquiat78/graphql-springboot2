@@ -7,6 +7,7 @@ import org.springframework.util.StringUtils;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 
+import io.basquiat.exception.GraphqlNotFoundException;
 import io.basquiat.music.models.Album;
 import io.basquiat.music.models.Musician;
 import io.basquiat.music.repo.AlbumRepository;
@@ -51,6 +52,10 @@ public class AlbumMutationResolver implements GraphQLMutationResolver {
 	 */
 	public Album createAlbum(long id, String title, String releasedYear) {
 		Musician musician = musicianRepository.findById(id).orElseGet(Musician::new);
+		if(musician.getName() == null) {
+			System.out.println("ddddddd");
+			throw new GraphqlNotFoundException("not found musician by id, it doesn't create album", id);
+		}
 		Album album = Album.builder()
 						   .musician(musician)
 						   .title(title)
@@ -70,6 +75,11 @@ public class AlbumMutationResolver implements GraphQLMutationResolver {
 	@Transactional
 	public Album updateAlbum(long id, String title, String releasedYear) {
 		Album album = albumRepository.findById(id).orElseGet(Album::new);
+		
+		if(album.getTitle() == null) {
+			throw new GraphqlNotFoundException("not found album by id, it doesn't update", id);
+		}
+		
 		// dirty checking
 		if(!StringUtils.isEmpty(title)) {
 			album.setTitle(title);
