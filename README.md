@@ -9,7 +9,9 @@ io.basquiat
  	ㄴ music    
  		ㄴ models    
  		ㄴ repo    
- 		ㄴ resolver    
+ 		ㄴ resolver
+ 		    ㄴalbum
+ 		    ㄴmusician
 resources    
 	ㄴ graphql    
 		- album.graphqls    
@@ -479,6 +481,10 @@ curl  -X POST  -H "Content-Type: application/json; charset=utf-8"  -d '{ "query"
 하지만 여기서는 일단 난중에 해볼 생각이다.     
 
 완료가 되면 그때 시도를....
+
+## At A Glance
+
+작성한 시점에서 query, mutation resolver를 리소스 별로 나눠서 작성하는 것이 더 좋을 것 같아서 현재는 예제 코드와는 달리 분리해서 작성을 완성했다.
 
 ## Next 
 
