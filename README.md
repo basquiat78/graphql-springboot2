@@ -679,7 +679,7 @@ public class MusicianMutationResolver implements GraphQLMutationResolver {
 근데 문제는 다음과 같은 응답을 받는다.
 
 
-![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/use-resolver/capture/capture5.png)
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/use-resolver/capture/capture6.png)
 
 ```
 메세지 하단부의 정보
@@ -833,7 +833,7 @@ public class GraphQLErrorConfiguration {
 
 ```
 
-![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/use-resolver/capture/capture5.png)
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/use-resolver/capture/capture7.png)
 
 
 ![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/use-resolver/capture/wow.gif)
