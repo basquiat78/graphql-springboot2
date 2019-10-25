@@ -2,6 +2,8 @@ package io.basquiat.music.resolver.musician;
 
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +32,8 @@ import io.basquiat.music.repo.MusicianRepository;
  * 
  */
 @Component
-public class MusicQueryResolver implements GraphQLQueryResolver {
+@Transactional
+public class MusicianQueryResolver implements GraphQLQueryResolver {
 
 	@Autowired
 	private MusicianRepository musicianRepository;

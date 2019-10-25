@@ -2,6 +2,7 @@ package io.basquiat.music.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -41,7 +42,7 @@ public class Album {
 	@Column(name = "released_year")
 	private String releasedYear;
 	
-	@ManyToOne(optional = false)
+	@ManyToOne(fetch = FetchType.EAGER, optional = false)
 	@JoinColumn(name = "musician_id", nullable = false, updatable = false)
 	private Musician musician;
 	

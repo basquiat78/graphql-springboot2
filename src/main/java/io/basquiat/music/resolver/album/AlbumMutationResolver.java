@@ -1,8 +1,9 @@
 package io.basquiat.music.resolver.album;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
@@ -33,6 +34,7 @@ import io.basquiat.music.repo.MusicianRepository;
  * 
  */
 @Component
+@Transactional
 public class AlbumMutationResolver implements GraphQLMutationResolver {
 
 	@Autowired
@@ -72,7 +74,6 @@ public class AlbumMutationResolver implements GraphQLMutationResolver {
 	 * @param releasedYear
 	 * @return Album
 	 */
-	@Transactional
 	public Album updateAlbum(long id, String title, String releasedYear) {
 		Album album = albumRepository.findById(id).orElseGet(Album::new);
 		

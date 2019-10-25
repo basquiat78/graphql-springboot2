@@ -2,6 +2,8 @@ package io.basquiat.music.resolver.album;
 
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +32,7 @@ import io.basquiat.music.repo.AlbumRepository;
  * 
  */
 @Component
+@Transactional
 public class AlbumQueryResolver implements GraphQLQueryResolver {
 
 	@Autowired

@@ -1,8 +1,9 @@
 package io.basquiat.music.resolver.musician;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
@@ -31,6 +32,7 @@ import io.basquiat.music.repo.MusicianRepository;
  * 
  */
 @Component
+@Transactional
 public class MusicianMutationResolver implements GraphQLMutationResolver {
 
 	@Autowired
@@ -60,7 +62,6 @@ public class MusicianMutationResolver implements GraphQLMutationResolver {
 	 * @param genre
 	 * @return Musician
 	 */
-	@Transactional
 	public Musician updateMusician(long id, String name, String genre) {
 		// id로 뮤지션을 찾아온다.
 		Musician musician = musicianRepository.findById(id).orElseGet(Musician::new);

@@ -45,7 +45,7 @@ public class Musician {
 	/** 뮤지션의 주요 음악 장르 */
 	private String genre;
 	
-	@OneToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL, mappedBy="musician")
+	@OneToMany(fetch = FetchType.LAZY, cascade=CascadeType.ALL, mappedBy="musician")
 	private List<Album> albums;
 
 }
