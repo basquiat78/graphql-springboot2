@@ -128,6 +128,6 @@ Spring boot와 관련 정보를 찾다 보니 3가지 방식으로 구현할 수
 
 ## complete Branch
 
-[like-controller](https://github.com/basquiat78/graphql-springboot2/tree/like-controller)
+[like-controller complete](https://github.com/basquiat78/graphql-springboot2/tree/like-controller)
     
-[use-resolver -> error handler 진행중..](https://github.com/basquiat78/graphql-springboot2/tree/use-resolver)
+[use-resolver complete](https://github.com/basquiat78/graphql-springboot2/tree/use-resolver)
