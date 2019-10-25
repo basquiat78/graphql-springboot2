@@ -453,3 +453,31 @@ query {
 ```
 
 ![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/use-resolver/capture/capture4.png)
+
+cURL로 하는 방식 역시 마찬가지다.
+
+```
+curl  -X POST  -H "Content-Type: application/json; charset=utf-8"  -d '{ "query": "{ musician(id:1) { name genre albums { title releasedYear  } } }" }'  http://localhost:8080/music
+
+```
+
+일단 테스트 하는 방식중 GraphiQL를 이용하는 방식이 있다. 다운로드용도 존재하고 standalone 형식으로 pom.xml에
+
+```
+<dependency>
+    <groupId>com.graphql-java</groupId>
+    <artifactId>graphiql-spring-boot-starter</artifactId>
+    <version>5.0.2</version>
+</dependency>
+
+```
+
+을 통해 접근하는 방식도 있다.
+
+하지만 여기서는 일단 난중에 해볼 생각이다.
+
+## Next 
+
+컨트롤러가 없기 때문에 이 방식의 경우에는 Error Handler에 대한 부분이 필요하다.
+
+이것은 현재 진행중....
