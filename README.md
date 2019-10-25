@@ -5,15 +5,15 @@
 컨트롤러가 없고 Query, Mutation에 맞는 리졸버를 구현함으로써 그것이 대신 컨트롤러 역할을 하게 된다.
 
 ## 구조
-io.basquiat
- 	ㄴ music
- 		ㄴ models
- 		ㄴ repo
- 		ㄴ resolver
-resources
-	ㄴ graphql
-		- album.graphqls
-		- musician.graphqls
+io.basquiat    
+ 	ㄴ music    
+ 		ㄴ models    
+ 		ㄴ repo    
+ 		ㄴ resolver    
+resources    
+	ㄴ graphql    
+		- album.graphqls    
+		- musician.graphqls    
 
 ## application.yml Configuration
 
