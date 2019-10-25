@@ -474,7 +474,11 @@ curl  -X POST  -H "Content-Type: application/json; charset=utf-8"  -d '{ "query"
 
 을 통해 접근하는 방식도 있다.
 
-하지만 여기서는 일단 난중에 해볼 생각이다.
+일종의 GraphQL IDE라고 하는데 아직 확인해 보진 않았다.
+
+하지만 여기서는 일단 난중에 해볼 생각이다.     
+
+완료가 되면 그때 시도를....
 
 ## Next 
 
