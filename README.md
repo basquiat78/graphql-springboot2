@@ -400,3 +400,56 @@ mutation {
 
 
 ![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/use-resolver/capture/capture1.png)
+
+그러면 query도??
+
+```
+{"query":"{musicians {name genre albums{ title releasedYear } } }"}
+
+```
+
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/use-resolver/capture/capture2.png)
+
+날리는 방식 자체가 약간 지저분하다는 느낌이 든다.
+
+
+어라? 그러면 like-controller처럼 못하는건가?
+
+아니다.
+
+포스트맨의 GraphQL를 이용하면 된다.
+
+기존처럼
+
+```
+mutation {
+    createMusician(name:"Charlie Parker", genre:"jazz") {
+        name
+        genre
+        albums {
+            title
+        }
+    }
+}
+
+```
+
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/use-resolver/capture/capture3.png)
+
+물론 뮤지션 정보를 가져오는 방식도 기존처럼
+
+```
+query {
+    musicians {
+        name
+        genre
+        albums {
+        	title
+        	releasedYear
+        }
+    }
+}
+
+```
+
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/use-resolver/capture/capture4.png)
