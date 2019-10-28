@@ -317,14 +317,10 @@ import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 import io.basquiat.music.service.fetcher.album.AlbumCreateMutation;
-import io.basquiat.music.service.fetcher.album.AlbumDataFetcher;
 import io.basquiat.music.service.fetcher.album.AlbumDeleteMutation;
-import io.basquiat.music.service.fetcher.album.AlbumListDataFetcher;
 import io.basquiat.music.service.fetcher.album.AlbumUpdateMutation;
 import io.basquiat.music.service.fetcher.music.MusicianCreateMutation;
-import io.basquiat.music.service.fetcher.music.MusicianDataFetcher;
 import io.basquiat.music.service.fetcher.music.MusicianDeleteMutation;
-import io.basquiat.music.service.fetcher.music.MusicianListDataFetcher;
 import io.basquiat.music.service.fetcher.music.MusicianUpdateMutation;
 
 /**
