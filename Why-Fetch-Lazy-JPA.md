@@ -148,3 +148,5 @@ Hibernate: select album0_.id as id1_0_, album0_.musician_id as musician4_0_, alb
 아하~ LAZY 전략을 선택했기 때문에 단지 앨범 정보를 가져오는 쿼리 한번만 날아갔다는 것을 확인할 수 있다.
 
 이것이 뭐 얼마나 큰 의미가 있겠냐만은 나름대로 의미가 있다고 생각한다.
+
+JPA와 GraphQL의 궁합이 잘 맞는다고 봐도 될까???

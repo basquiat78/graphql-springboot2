@@ -900,6 +900,9 @@ public class DefaultGraphQLErrorHandler implements GraphQLErrorHandler {
 ```
 위 코드를 보면 발생한 모든 에러의 정보들을 리스트에 담아 내고 있다. 하지만 GraphQLErrorConfiguration.java 코드를 보면 GraphQLErrorAdapter.java에서 override한 녀석들만 리스트에 담게 되어 있다.
 
+## JPA와 GraphQL의 궁합
+
+[Why-Fetch-Lazy-JPA](https://github.com/basquiat78/graphql-springboot2/blob/use-resolver/Why-Fetch-Lazy-JPA.md)
 
 ## At A Glance
 
