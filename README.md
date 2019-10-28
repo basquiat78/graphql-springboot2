@@ -914,7 +914,13 @@ public class DefaultGraphQLErrorHandler implements GraphQLErrorHandler {
 
 아직까지는 JPA하수인가 보다....
 
-또한 N+1 문제는 어떻게??? 일단 GraphQL에 집중하고 해당 문제는 뒤로 미뤄두자...(안좋은 습관...)
+또한 N+1 문제는 어떻게??? 
+
+예제 자체가 작아서 많은 부분을 체크하지 못한것은 실수이긴 하다.
+
+예를 들면 뮤지션과 앨범의 관계를 고려해 볼때 예제 자체가 가지고 있는 경우의 수가 매우 작기 때문이다.
+
+일단 GraphQL에 집중하고 해당 문제는 뒤로 미뤄두자...(안좋은 습관...)
 
 ## Next 
 
