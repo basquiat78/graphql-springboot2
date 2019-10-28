@@ -8,8 +8,9 @@ import java.io.IOException;
 import javax.annotation.PostConstruct;
 
 import io.basquiat.music.service.fetcher.album.AlbumDataFetchers;
+import io.basquiat.music.service.fetcher.album.AlbumMutations;
 import io.basquiat.music.service.fetcher.music.MusicianDataFetchers;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.basquiat.music.service.fetcher.music.MusicianMutations;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
@@ -21,12 +22,6 @@ import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
-import io.basquiat.music.service.fetcher.album.AlbumCreateMutation;
-import io.basquiat.music.service.fetcher.album.AlbumDeleteMutation;
-import io.basquiat.music.service.fetcher.album.AlbumUpdateMutation;
-import io.basquiat.music.service.fetcher.music.MusicianCreateMutation;
-import io.basquiat.music.service.fetcher.music.MusicianDeleteMutation;
-import io.basquiat.music.service.fetcher.music.MusicianUpdateMutation;
 
 /**
  * 
@@ -50,30 +45,17 @@ public class GraphQLProvider {
 
 	private final AlbumDataFetchers albumDataFetchers;
 	private final MusicianDataFetchers musicianDataFetchers;
+	private final AlbumMutations albumMutations;
+	private final MusicianMutations musicianMutations;
 
-	@Autowired
-	private MusicianCreateMutation musicianCreateMutation;
-	
-	@Autowired
-	private MusicianUpdateMutation musicianUpdateMutation;
-	
-	@Autowired
-	private MusicianDeleteMutation musicianDeleteMutation;
-	
-	@Autowired
-	private AlbumCreateMutation albumCreateMutation;
-	
-	@Autowired
-	private AlbumUpdateMutation albumUpdateMutation;
-	
-	@Autowired
-	private AlbumDeleteMutation albumDeleteMutation;
-	
 	private GraphQL graphQL;
 
-	public GraphQLProvider(AlbumDataFetchers albumDataFetchers, MusicianDataFetchers musicianDataFetchers) {
+	public GraphQLProvider(AlbumDataFetchers albumDataFetchers, MusicianDataFetchers musicianDataFetchers,
+						   AlbumMutations albumMutations, MusicianMutations musicianMutations) {
 		this.albumDataFetchers = albumDataFetchers;
 		this.musicianDataFetchers = musicianDataFetchers;
+		this.albumMutations = albumMutations;
+		this.musicianMutations = musicianMutations;
 	}
 
 	@PostConstruct
@@ -85,24 +67,30 @@ public class GraphQLProvider {
         TypeDefinitionRegistry typeRegistry = new SchemaParser().parse(musicianSchema);
         typeRegistry.merge(new SchemaParser().parse(albumSchema));
         
-        RuntimeWiring wiring = RuntimeWiring.newRuntimeWiring()
-                							.type(newTypeWiring("Query").dataFetcher("musician", this.musicianDataFetchers.getMusician())
-									                        		    .dataFetcher("musicians", this.musicianDataFetchers.getMusicianList())
-									                        		    .dataFetcher("album", this.albumDataFetchers.getAlbum())
-									                        		    .dataFetcher("albums", this.albumDataFetchers.getAlbumList())
-									                        		    
-        									)
-                							.type(newTypeWiring("Mutation").dataFetcher("createMusician", musicianCreateMutation)
-			                											   .dataFetcher("updateMusician", musicianUpdateMutation)
-			                											   .dataFetcher("deleteMusician", musicianDeleteMutation)
-			                											   .dataFetcher("createAlbum", albumCreateMutation)
-			                											   .dataFetcher("updateAlbum", albumUpdateMutation)
-			                											   .dataFetcher("deleteAlbum", albumDeleteMutation)
-                									)
-            								.build();
+        RuntimeWiring wiring = customRuntimeWiring();
         GraphQLSchema graphQLSchema = new SchemaGenerator().makeExecutableSchema(typeRegistry, wiring);
         graphQL = GraphQL.newGraphQL(graphQLSchema).build();
 	
+	}
+
+	private RuntimeWiring customRuntimeWiring() {
+		return RuntimeWiring.newRuntimeWiring()
+				.type(newTypeWiring("Query")
+						.dataFetcher("musician", this.musicianDataFetchers.getMusician())
+						.dataFetcher("musicians", this.musicianDataFetchers.getMusicianList())
+						.dataFetcher("album", this.albumDataFetchers.getAlbum())
+						.dataFetcher("albums", this.albumDataFetchers.getAlbumList())
+
+				)
+				.type(newTypeWiring("Mutation")
+						.dataFetcher("createMusician", this.musicianMutations.createMusician())
+						.dataFetcher("updateMusician", this.musicianMutations.updateMusician())
+						.dataFetcher("deleteMusician", this.musicianMutations.deleteMusician())
+						.dataFetcher("createAlbum", this.albumMutations.createAlbum())
+						.dataFetcher("updateAlbum", this.albumMutations.updateAlbum())
+						.dataFetcher("deleteAlbum", this.albumMutations.deleteAlbum())
+				)
+				.build();
 	}
 
 	@Bean
