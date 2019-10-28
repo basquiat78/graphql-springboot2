@@ -317,10 +317,14 @@ import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 import io.basquiat.music.service.fetcher.album.AlbumCreateMutation;
+import io.basquiat.music.service.fetcher.album.AlbumDataFetcher;
 import io.basquiat.music.service.fetcher.album.AlbumDeleteMutation;
+import io.basquiat.music.service.fetcher.album.AlbumListDataFetcher;
 import io.basquiat.music.service.fetcher.album.AlbumUpdateMutation;
 import io.basquiat.music.service.fetcher.music.MusicianCreateMutation;
+import io.basquiat.music.service.fetcher.music.MusicianDataFetcher;
 import io.basquiat.music.service.fetcher.music.MusicianDeleteMutation;
+import io.basquiat.music.service.fetcher.music.MusicianListDataFetcher;
 import io.basquiat.music.service.fetcher.music.MusicianUpdateMutation;
 
 /**
@@ -680,6 +684,29 @@ mutation {
 
 일단 이 방식은 나름대로의 익숙함이 있어서 작성하는데는 그리 오래 걸리지 않았다.
 
-하지만 DataFetcher를 이용하는 경우 각 질의수만큼 늘어나는 클래스가 사실 좀 불편하다.
+하지만 DataFetcher를 이용하는 경우 각 질의수만큼 늘어나는 클래스가 사실 좀 불편하다. --> 해결
 
 물론 이렇게 하면서 생기는 장점도 있긴 하지만 그 다음은 Resolver를 이용해 보겠다.
+
+
+
+## Before And After
+
+변경된 부분이 있습니다. (급 존대말)
+
+KSUG의 김재영님이 알려주신 방식인데 상당히 코드가 깔끔하고 멋지네요.
+
+예제를 그대로 구현할려고만 했던 저에게 많은 생각을 하게 합니다.
+
+무엇보다 아마 작년이었던가 우연히 백기선님의 유투브를 보다가 @Autowired를 통한 DI보다는 Constructor를 이용해서 주입을 하는 것을 본 적이 있습니다.
+
+그리고 Baedung같은 사이트에서도 저 방식의 코드를 자주 보게 되죠.
+
+관련 링크 하나 띄워봅니다.
+
+GraphQL과 관련된 레파지토리지만 스프링프레임워크와 관련 편의성보다는 좋은 코딩 습관이 중요한거 같습니다.
+
+
+[필드 주입(Field Injection) 대신 생성자 주입(Constructor Injection)을 사용해야 하는 이유](https://zorba91.tistory.com/238)
+
+
