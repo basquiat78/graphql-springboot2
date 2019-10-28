@@ -153,4 +153,6 @@ Hibernate: select album0_.id as id1_0_, album0_.musician_id as musician4_0_, alb
 
 이것이 뭐 얼마나 큰 의미가 있겠냐만은 나름대로 의미가 있다고 생각한다.
 
-JPA와 GraphQL의 궁합이 잘 맞는다고 봐도 될까???
+물론 예제 자체가 좀 한정적이라 많은 경우를 다루지 못해 놓친 부분들이 분명 있을것이다.
+
+하지만 어떤 면에서 JPA와 GraphQL의 궁합이 잘 맞는다고 봐도 될까???
