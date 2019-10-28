@@ -42,7 +42,7 @@ public class Album {
 	@Column(name = "released_year")
 	private String releasedYear;
 	
-	@ManyToOne(fetch = FetchType.EAGER, optional = false)
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "musician_id", nullable = false, updatable = false)
 	private Musician musician;
 	
