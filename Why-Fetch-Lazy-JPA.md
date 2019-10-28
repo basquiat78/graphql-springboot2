@@ -1,5 +1,9 @@
 ## 페치 전략
 
+[hibernate-lazy-eager-loading](https://www.baeldung.com/hibernate-lazy-eager-loading)    
+
+[즉시로딩과 지연로딩, 컬렉션 래퍼](https://yellowh.tistory.com/126)
+
 JPA에서 @OneToMany, @ManyToOne 관계에서 페치 전략을 Lazy로 하는 이유는 GraphQL의 특징에 기인한다.
 
 
