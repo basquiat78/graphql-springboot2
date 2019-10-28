@@ -7,6 +7,8 @@ import java.io.IOException;
 
 import javax.annotation.PostConstruct;
 
+import io.basquiat.music.service.fetcher.album.AlbumDataFetchers;
+import io.basquiat.music.service.fetcher.music.MusicianDataFetchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,14 +22,10 @@ import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 import io.basquiat.music.service.fetcher.album.AlbumCreateMutation;
-import io.basquiat.music.service.fetcher.album.AlbumDataFetcher;
 import io.basquiat.music.service.fetcher.album.AlbumDeleteMutation;
-import io.basquiat.music.service.fetcher.album.AlbumListDataFetcher;
 import io.basquiat.music.service.fetcher.album.AlbumUpdateMutation;
 import io.basquiat.music.service.fetcher.music.MusicianCreateMutation;
-import io.basquiat.music.service.fetcher.music.MusicianDataFetcher;
 import io.basquiat.music.service.fetcher.music.MusicianDeleteMutation;
-import io.basquiat.music.service.fetcher.music.MusicianListDataFetcher;
 import io.basquiat.music.service.fetcher.music.MusicianUpdateMutation;
 
 /**
@@ -49,13 +47,10 @@ public class GraphQLProvider {
 	
 	@Value("classpath:album.graphqls")
 	Resource album;
-	
-	@Autowired
-	private MusicianDataFetcher musicianDataFetcher;
-	
-	@Autowired
-	private MusicianListDataFetcher musicianListDataFetcher;
-	
+
+	private final AlbumDataFetchers albumDataFetchers;
+	private final MusicianDataFetchers musicianDataFetchers;
+
 	@Autowired
 	private MusicianCreateMutation musicianCreateMutation;
 	
@@ -64,12 +59,6 @@ public class GraphQLProvider {
 	
 	@Autowired
 	private MusicianDeleteMutation musicianDeleteMutation;
-	
-	@Autowired
-	private AlbumDataFetcher albumDataFetcher;
-	
-	@Autowired
-	private AlbumListDataFetcher albumListDataFetcher;
 	
 	@Autowired
 	private AlbumCreateMutation albumCreateMutation;
@@ -81,7 +70,12 @@ public class GraphQLProvider {
 	private AlbumDeleteMutation albumDeleteMutation;
 	
 	private GraphQL graphQL;
-	
+
+	public GraphQLProvider(AlbumDataFetchers albumDataFetchers, MusicianDataFetchers musicianDataFetchers) {
+		this.albumDataFetchers = albumDataFetchers;
+		this.musicianDataFetchers = musicianDataFetchers;
+	}
+
 	@PostConstruct
 	public void setupSchema() throws IOException {
 		
@@ -92,10 +86,10 @@ public class GraphQLProvider {
         typeRegistry.merge(new SchemaParser().parse(albumSchema));
         
         RuntimeWiring wiring = RuntimeWiring.newRuntimeWiring()
-                							.type(newTypeWiring("Query").dataFetcher("musician", musicianDataFetcher)
-									                        		    .dataFetcher("musicians", musicianListDataFetcher)
-									                        		    .dataFetcher("album", albumDataFetcher)
-									                        		    .dataFetcher("albums", albumListDataFetcher)
+                							.type(newTypeWiring("Query").dataFetcher("musician", this.musicianDataFetchers.getMusician())
+									                        		    .dataFetcher("musicians", this.musicianDataFetchers.getMusicianList())
+									                        		    .dataFetcher("album", this.albumDataFetchers.getAlbum())
+									                        		    .dataFetcher("albums", this.albumDataFetchers.getAlbumList())
 									                        		    
         									)
                 							.type(newTypeWiring("Mutation").dataFetcher("createMusician", musicianCreateMutation)
