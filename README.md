@@ -914,6 +914,8 @@ public class DefaultGraphQLErrorHandler implements GraphQLErrorHandler {
 
 아직까지는 JPA하수인가 보다....
 
+또한 N+1 문제는 어떻게??? 일단 GraphQL에 집중하고 해당 문제는 뒤로 미뤄두자...(안좋은 습관...)
+
 ## Next 
 
 현재까지는 에러에 대한 어떤 처리도 하지 않았다.
