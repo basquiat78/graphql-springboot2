@@ -10,7 +10,7 @@ JPA에서 @OneToMany, @ManyToOne 관계에서 페치 전략을 Lazy로 하는 �
 fetch = FetchType.EAGER가 디폴트이기 때문에 일반적으로 @OneToMany에서는 LAZY, @ManyToOne에서는 EAGER 페치 전략을 많이 사용한다.
 
 
-하지만 GraphQL에서는 글로벌 페치 전략을 둘 다 Lazy로 하는 것이 맞다고 개인적으로 생각한다.
+하지만 GraphQL에서는 글로벌 페치 전략을 둘 다 Lazy로 하는 것이 맞다고 개인적으로 생각한다. (그냥 개인적인 생각이다.)
 
 아마도 눈썰미가 있으신 분들은 이미 눈치챘을거 같다.
 
