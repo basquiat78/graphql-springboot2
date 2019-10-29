@@ -917,6 +917,8 @@ public class DefaultGraphQLErrorHandler implements GraphQLErrorHandler {
 
 이건 테스트 코드를 짜서 테스트 결과를 올려볼 생각이다.
 
+[use-resolver-other 피드백을 중심으로 작성한 브랜](https://github.com/basquiat78/graphql-springboot2/tree/use-resolver-other)
+
 ## At A Glance
 
 작성한 시점에서 query, mutation resolver를 리소스 별로 나눠서 작성하는 것이 더 좋을 것 같아서 현재는 예제 코드와는 달리 분리해서 작성을 완성했다.
