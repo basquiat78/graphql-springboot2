@@ -411,3 +411,13 @@ Hibernate: select musician0_.id as id1_1_0_, musician0_.age as age2_1_0_, musici
 ```
 
 ![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/use-resolver-other/capture/capture8.png)
+
+## At A Glance
+
+어라? 근데 이게 또 상당히 깔끔하다. 일단 엔티티 정의시 양방향을 고민할 필요가 없다. (근데 이게 맞나?)
+
+개인적으로 코딩을 하고 테스트를 하면서 어떤 것이 더 좋은 것이고 맞는 것인지 잘 모르겠다.
+
+어쩌면 선택사항이 아닐까? 싶기도 하고....
+
+선택은 각자의 몫이 아닌가 싶기도 하고....
