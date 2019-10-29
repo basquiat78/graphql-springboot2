@@ -19,7 +19,7 @@ type Musician {
 	name: String
 	age: Int @default(value: 0)
 	genre: String
-	albums: [Album] @relation(name: "Musicians")
+	albums: [Album] @relation(name: "Albums")
 }
 
 type Query {
@@ -37,7 +37,7 @@ type Album {
 	id: ID
 	title: String
 	releasedYear: String
-	musician: Musician @relation(name: "Musicians")
+	musician: Musician @relation(name: "Musician")
 }
 
 extend type Query {

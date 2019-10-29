@@ -2,7 +2,7 @@ type Album {
 	id: ID
 	title: String
 	releasedYear: String
-	musician: Musician @relation(name: "Musicians")
+	musician: Musician @relation(name: "Musician")
 }
 
 extend type Query {
