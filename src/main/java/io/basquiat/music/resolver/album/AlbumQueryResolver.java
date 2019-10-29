@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
@@ -35,9 +34,19 @@ import io.basquiat.music.repo.AlbumRepository;
 @Transactional
 public class AlbumQueryResolver implements GraphQLQueryResolver {
 
-	@Autowired
-	private AlbumRepository albumRepository;
+	private final AlbumRepository albumRepository;
 	
+	/**
+	 * 
+	 * constructor
+	 * 
+	 * @param albumRepository
+	 */
+	public AlbumQueryResolver(AlbumRepository albumRepository) {
+		super();
+		this.albumRepository = albumRepository;
+	}
+
 	/**
 	 * get album by id
 	 * 

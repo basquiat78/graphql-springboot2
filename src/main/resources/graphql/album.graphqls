@@ -2,7 +2,7 @@ type Album {
 	id: ID
 	title: String
 	releasedYear: String
-	musician: Musician
+	musician: Musician @relation(name: "Musicians")
 }
 
 extend type Query {
@@ -11,7 +11,7 @@ extend type Query {
 }
 
 extend type Mutation {
-	createAlbum(id: ID, title: String!, releasedYear: String!): Album
+	createAlbum(title: String!, releasedYear: String!, musicianId: Int!): Album
 	updateAlbum(id: ID, title: String!, releasedYear: String!): Album!
 	deleteAlbum(id: ID): Boolean
 }

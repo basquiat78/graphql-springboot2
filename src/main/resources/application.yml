@@ -31,3 +31,17 @@ graphql:
        mapping: /music
        enabled: true
        corsEnabled: true
+
+#logging
+logging:
+  file: logs/my-logging-file.log
+  level:
+    root: INFO
+    org:
+      springframework:
+        web: DEBUG
+  pattern:
+    # console에 찍히는 로그 형식 정의
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    # console에서 로그는 위에 형식으로 찍히지만 파일로 씌여질 때 해당 패턴으로 찍는다. 
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

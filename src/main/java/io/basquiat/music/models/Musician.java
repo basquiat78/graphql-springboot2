@@ -1,14 +1,9 @@
 package io.basquiat.music.models;
 
-import java.util.List;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -44,8 +39,5 @@ public class Musician {
 	
 	/** 뮤지션의 주요 음악 장르 */
 	private String genre;
-	
-	@OneToMany(fetch = FetchType.LAZY, cascade=CascadeType.ALL, mappedBy="musician")
-	private List<Album> albums;
 
 }

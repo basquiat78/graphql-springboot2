@@ -2,7 +2,6 @@ package io.basquiat.music.resolver.album;
 
 import javax.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -10,9 +9,7 @@ import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 
 import io.basquiat.exception.GraphqlNotFoundException;
 import io.basquiat.music.models.Album;
-import io.basquiat.music.models.Musician;
 import io.basquiat.music.repo.AlbumRepository;
-import io.basquiat.music.repo.MusicianRepository;
 
 /**
  * 
@@ -37,11 +34,16 @@ import io.basquiat.music.repo.MusicianRepository;
 @Transactional
 public class AlbumMutationResolver implements GraphQLMutationResolver {
 
-	@Autowired
-	private MusicianRepository musicianRepository;
+	private final AlbumRepository albumRepository;
 
-	@Autowired
-	private AlbumRepository albumRepository;
+	/**
+	 * constructor
+	 * 	
+	 * @param albumRepository
+	 */
+	public AlbumMutationResolver(AlbumRepository albumRepository) {
+		this.albumRepository = albumRepository;
+	}
 
 	/**
 	 * 
@@ -52,16 +54,11 @@ public class AlbumMutationResolver implements GraphQLMutationResolver {
 	 * @param releasedYear
 	 * @return Album
 	 */
-	public Album createAlbum(long id, String title, String releasedYear) {
-		Musician musician = musicianRepository.findById(id).orElseGet(Musician::new);
-		if(musician.getName() == null) {
-			System.out.println("ddddddd");
-			throw new GraphqlNotFoundException("not found musician by id, it doesn't create album", id);
-		}
+	public Album createAlbum(String title, String releasedYear, long musicianId) {
 		Album album = Album.builder()
-						   .musician(musician)
 						   .title(title)
 						   .releasedYear(releasedYear)
+						   .musicianId(musicianId)
 						   .build();
 		return albumRepository.save(album);
 	}
