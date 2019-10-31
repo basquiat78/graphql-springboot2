@@ -395,13 +395,13 @@ use-resolver 브랜치에서 했던 방식으로 Postman에서 테스트를 하�
 자 그럼 위 gui주소로 들어가면 이미지처럼 우측 중간에 2개의 탭을 볼 수 있다. 그 중에 Schema를 클릭하면 설정한 스키마 정보를 보여준다.
 
 
-![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/useing-annotation/capture/capture1.png)
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/using-annotation/capture/capture1.png)
 
 
 물론 DOCS로 보는 것이 편할 수도 있다.
 
 
-![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/useing-annotation/capture/capture2.png)
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/using-annotation/capture/capture2.png)
 
 
 그럼 실제로 이전처럼 했을떄와 같이 작동하는지 확인해보자.
@@ -417,27 +417,27 @@ use-resolver 브랜치에서 했던 방식으로 Postman에서 테스트를 하�
 5. 앨범 정보도 뮤지션과 마찬가지
 
 
-![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/useing-annotation/capture/capture3.png)
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/using-annotation/capture/capture3.png)
 1. 뮤지션 정보 생성
 
 
-![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/useing-annotation/capture/capture4.png)
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/using-annotation/capture/capture4.png)
 2. 뮤지션의 앨범 생성
 
 
-![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/useing-annotation/capture/capture5.png)
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/using-annotation/capture/capture5.png)
 3. 뮤지션 정보만 가져오기
 
 
-![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/useing-annotation/capture/capture6.png)
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/using-annotation/capture/capture6.png)
 4. 뮤지션의 정보와 앨범 정보까지 가져오기
 
 
-![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/useing-annotation/capture/capture7.png)
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/using-annotation/capture/capture7.png)
 5. 앨범 정보만 가져오기
 
 
-![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/useing-annotation/capture/capture8.png)
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/using-annotation/capture/capture8.png)
 6. 앨범 정보와 뮤지션 정보까지 가져오기
 
 
