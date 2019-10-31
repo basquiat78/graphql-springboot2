@@ -27,10 +27,12 @@ spring:
 # default endpoint 'graphql'
 # if you change endpoint, graphql.servlet.mapping -> definition your endpoint
 graphql:
-  servlet:
-       mapping: /music
-       enabled: true
-       corsEnabled: true
+  spqr:
+    http:
+      enabled: true
+      endpoint: /music
+    gui:
+      enabled: true
 
 #logging
 logging:

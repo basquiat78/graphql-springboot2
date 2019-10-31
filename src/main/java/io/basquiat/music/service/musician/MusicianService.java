@@ -1,50 +1,57 @@
-package io.basquiat.music.resolver.musician;
+package io.basquiat.music.service.musician;
+
+import java.util.List;
 
 import javax.transaction.Transactional;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
-import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 
 import io.basquiat.exception.GraphqlNotFoundException;
 import io.basquiat.music.models.Musician;
 import io.basquiat.music.repo.MusicianRepository;
+import io.leangen.graphql.annotations.GraphQLMutation;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
 
-/**
- * 
- * created by basquiat
- * 
- * Mutation Resolver
- * 
- * 필드명을 작성하 방식이 baeldung.com에 명시되어 있다.
- * 
- * 만일 스키마에 musicians, musician이라면 리턴되는 타입에 따라 3가지 방식을 적용할 수 있다.
- * 
- * 1. musicians
- * 2. isMusicians 만일 boolean을 리턴한다면
- * 3. getMusicians
- * 
- * 여기서는 스키마에 정의된 필드 명으로 작성한다. 
- * 
- * @see https://www.baeldung.com/spring-graphql
- * 
- */
-@Component
+@Service("musicianService")
+@GraphQLApi
 @Transactional
-public class MusicianMutationResolver implements GraphQLMutationResolver {
+public class MusicianService {
 
 	private final MusicianRepository musicianRepository;
-	
-	/**
-	 * constructor
-	 * 
-	 * @param musicianRepository
-	 */
-	public MusicianMutationResolver(MusicianRepository musicianRepository) {
+
+	public MusicianService(MusicianRepository musicianRepository) {
 		this.musicianRepository = musicianRepository;
 	}
-
+	
+	/** Query Type */
+	
+	/**
+	 * get musician by id
+	 * 
+	 * @param id
+	 * @return Musician
+	 */
+	@GraphQLQuery(name = "musician")
+	public Musician musician(long id) {
+		return musicianRepository.findById(id).orElseGet(Musician::new);
+	}
+	
+	/**
+	 * 
+	 * get musician list
+	 * 
+	 * @return List<Musician>
+	 */
+	@GraphQLQuery(name = "musicians")
+	public List<Musician> musicians() {
+		return musicianRepository.findAll();
+	}
+	
+	
+	/** Mutation Type */
+	
 	/**
 	 * create musician
 	 * 
@@ -52,6 +59,7 @@ public class MusicianMutationResolver implements GraphQLMutationResolver {
 	 * @param genre
 	 * @return Musician
 	 */
+	@GraphQLMutation(name = "createMusician")
 	public Musician createMusician(String name, String genre) {
 		Musician musician = Musician.builder()
 									.name(name)
@@ -69,6 +77,7 @@ public class MusicianMutationResolver implements GraphQLMutationResolver {
 	 * @param genre
 	 * @return Musician
 	 */
+	@GraphQLMutation(name = "updateMusician")
 	public Musician updateMusician(long id, String name, String genre) {
 		// id로 뮤지션을 찾아온다.
 		Musician musician = musicianRepository.findById(id).orElseGet(Musician::new);
@@ -93,6 +102,7 @@ public class MusicianMutationResolver implements GraphQLMutationResolver {
 	 * @param id
 	 * @return boolean
 	 */
+	@GraphQLMutation(name = "deleteMusician")
 	public boolean deleteMusician(long id) {
 		musicianRepository.deleteById(id);
 		return musicianRepository.existsById(id);
