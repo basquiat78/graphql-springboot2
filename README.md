@@ -133,3 +133,5 @@ Spring boot와 관련 정보를 찾다 보니 3가지 방식으로 구현할 수
 [use-resolver complete](https://github.com/basquiat78/graphql-springboot2/tree/use-resolver)
 
 [use-resolver-other complete](https://github.com/basquiat78/graphql-springboot2/tree/use-resolver-other)
+
+[using-annotation](https://github.com/basquiat78/graphql-springboot2/tree/using-annotation)
