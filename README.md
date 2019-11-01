@@ -1,459 +1,488 @@
-## Using Annotation
+## Subscription
 
-이번 브랜치는 annotation을 활용한 브랜치이다.
+Subscription은 Websocket을 구현한 것이다.
+
+하지만 찾아 본 방법들을 보면서 테스트할 방법이 딱히 없어서 현재 이 브랜치는 다음과 같은 방식을 통해서 테스트 해볼 것이다.
+
+이전 브랜치인 [using-annotation](https://github.com/basquiat78/graphql-springboot2/tree/using-annotation)을 확장할 것이다.
+
+이번 테스트는 웹 ide의 기능을 이용해야 하기 때문인데...
+
+무엇보다 다음과 같은 시나리오를 갖을 생각이다.
 
 
-기존의 방식은 graphqls라는 파일을 만들어서 스키마를 만들었었다.
+## Subscription Scenario
 
-하지만 이 방식은 모델 또는 엔티티에 특정 어노테이션을 설정해서 객체 자체가 스키마가 되는 방식이다.
 
-내부적인 로직은 살펴보지 않았지만 아마도 클래식 명이 타입 명으로 그리고 어노테이션이 붙은 필드에 대해서 필드를 매핑하는 형식이 아닌가 싶다.
+1. 특정 엔트포인트를 리스너를 한다. 총 두개의 엔트포인트를 리스너 할 예정인데 다음과 같다.
+	- statusMusician
+	- statusAlbum
+	
+2. 각 엔트포인트는 다음과 같은 코드값을 통해서 각 액션에 해당하는 부분을 구독할 것이다.
+	- 뮤지션이 새로 등록될 때
+	- 뮤지션의 정보가 변경될 때
+	- 앨범이 새로 등록될 때
+	- 앨범의 정보가 변경될 때
+	
+위에 정의한 것처럼 뮤지션 (또는 음반)이 새로 등록되거나 뮤지션 (또는 음반)의 정보가 될 때마다 그 정보를 받아서 보여주는 방식의 테스트를 할 것이다.
 
-이 방식이 좋은 이유는 기존에 짜여진 스프링 부트의 코드를 고스란히 사용할 수 있다는 것이다.
 
-다음과 같이 pom.xml에 다음과 같이 세팅만 하면 된다.
+## Configuration
+
+Websocket과 Reactor를 이용하기 때문에 다음과 같이 pom.xml에 추가를 하자.
 
 ```
 	<dependency>
-		<groupId>io.leangen.graphql</groupId>
-		<artifactId>graphql-spqr-spring-boot-starter</artifactId>
-		<version>0.0.4</version>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-websocket</artifactId>
+	</dependency>
+	
+	<dependency>
+		<groupId>io.projectreactor</groupId>
+		<artifactId>reactor-core</artifactId>
 	</dependency>
 
 ```
 
-다만 위에 버전을 보면 알겠지만 0.0.4가 최신버전 (2019년 10월 31일 기준) 인데 버전만 봐도 마이너 버전이며 해당 깃헙에서도 ALPHA버전임을 상기시키고 있다.
-
-한마디로 아직은 완성된 것은 아니라는 말이니 그것을 감안해서 사용하라는 의미이다. 
-
-사실 공식 사이트는 com.graphql 깃헙에도 자체 라이브러리를 통해서 어노테이션을 이용한 방식이 이미 존재하고 baeldung사이트에서도 그 예제가 나와있다.
-
-내부 분석은 일단 난중에 하고 어떻게 설정하고 작동하는지 확인해 보자.
+pub/sub에서 어떤 액션인지에 대한 코드값을 구분하기 위해 StatusCode를 관리하는 enum을 만든다.
 
 
-## Model 또는 Entity설정
-
-일단 classPath의 resource폴더의 graphql폴더는 밖으로 뺴놓았다.
-
-어노테이션으로 하는 만큼 그래도 기본적인 스키마를 작성하고 그것을 토대로 설정하는게 맞는거 같아서 지우지 않았으니 참조하시면 된다.
-
-
-Musician.java
+StatusCode.java
 
 ```
-package io.basquiat.music.models;
+package io.basquiat.music.code;
 
-import java.util.List;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
-import io.leangen.graphql.annotations.GraphQLQuery;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import java.util.Arrays;
 
 /**
  * 
- * Musician Entity
+ * enum status code
  * 
  * created by basquiat
  *
  */
-@Builder
-@Data
-@AllArgsConstructor
-@RequiredArgsConstructor
-@Entity
-@Table(name = "musician")
-public class Musician {
+public enum StatusCode {
 
-	/** 뮤지션 유니크 아이디 */
-	@Id
-	@GeneratedValue(strategy= GenerationType.AUTO)
-	@GraphQLQuery(name = "id")
-	private long id;
+	NEW("new"),
 	
-	/** 뮤지션 이름 */
-	@GraphQLQuery(name = "name")
-	private String name;
+	UPDATE("update");
 	
-	/** 뮤지션 나이 */
-	@GraphQLQuery(name = "age")
-	private int age;
+	/** enum code */
+	public String code;
 	
-	/** 뮤지션의 주요 음악 장르 */
-	@GraphQLQuery(name = "genre")
-	private String genre;
+	/** String type constructor */
+	StatusCode(String code) {
+		this.code = code;
+	}
 
-	/** 뮤지션의 앨범 리스트 */
-	@OneToMany(fetch = FetchType.LAZY, cascade=CascadeType.ALL, mappedBy="musician")
-	@GraphQLQuery(name = "albums")
-	private List<Album> albums;
+	/**
+	 * get Enum Object from code
+	 * @param code
+	 * @return StatusCode
+	 */
+	public static StatusCode fromString(String code) {
+		return Arrays.asList(StatusCode.values())
+					 .stream()
+					 .filter( statusCode -> statusCode.code.equalsIgnoreCase(code) )
+					 .map(statusCode -> statusCode)
+					 .findFirst().orElse(null);
+    }
 	
 }
 
-
 ```
 
-Album.java
+서비스 레벨에서 pub/sub을 구현해야 한다.
 
-```
-package io.basquiat.music.models;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
-import io.leangen.graphql.annotations.GraphQLQuery;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-
-/**
- * 
- * Album Entity
- * 
- * created by basquiat
- *
- */
-@Builder
-@Data
-@AllArgsConstructor
-@RequiredArgsConstructor
-@Entity
-@Table(name = "album")
-public class Album {
-
-	/** 앨범 아이디 */
-	@Id
-	@GeneratedValue(strategy= GenerationType.AUTO)
-	@GraphQLQuery(name = "id")
-	private long id;
-	
-	/** 음반 명 */
-	@GraphQLQuery(name = "title")
-	private String title;
-
-	/** 릴리즈된 년도 */
-	@Column(name = "released_year")
-	@GraphQLQuery(name = "releasedYear")
-	private String releasedYear;
-
-	/** 해당 앨범의 뮤지션 정보 */
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "musician_id", nullable = false, updatable = false)
-	@GraphQLQuery(name = "musician")
-	private Musician musician;
-	
-}
+그 중에 MusicianService.java만 살펴보자. 앨범 쪽도 똑같기 때문이다.
 
 
 ```
-
-기존의 코드와 좀 달라진 점은 @GraphQLQuery이 붙어 있다는 것이다.
-
-이런 식으로 코드를 읽으면 된다.
-
-'Musician.java에 어노테이션들이 붙었는데 type은 Musician이고 해당 타입이 갖는 필드는 id, name, age, genre, albums를 갖는 코드이다.' 
-
-결국 
-
-```
-type Musician {
-	id: ID
-	name: String
-	age: Int @default(value: 0)
-	genre: String
-	albums: [Album] @relation(name: "Albums")
-}
-
-```
-
-이것을 저 위에 스키마처럼 내부적으로 생성할 것이라는 것을 짐작할 수 있게 된다.
-
- 
-## How to create Query, Mutation ? 
-
-만일 기존의 스프링 부트의 소스가 있다면 다음과 같이 수정할 수 있게 된다.
-
-그 중에 AlbumService.java 하나만 확인해 보자.
-
-
-```
-package io.basquiat.music.service.album;
+package io.basquiat.music.service.musician;
 
 import java.util.List;
 
 import javax.transaction.Transactional;
 
+import org.reactivestreams.Publisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import io.basquiat.exception.GraphqlNotFoundException;
-import io.basquiat.music.models.Album;
+import io.basquiat.music.code.StatusCode;
 import io.basquiat.music.models.Musician;
-import io.basquiat.music.repo.AlbumRepository;
 import io.basquiat.music.repo.MusicianRepository;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLSubscription;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import io.leangen.graphql.spqr.spring.util.ConcurrentMultiMap;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 
-@Service("albumService")
+@Service("musicianService")
 @GraphQLApi
 @Transactional
-public class AlbumService {
+public class MusicianService {
 
 	private final MusicianRepository musicianRepository;
 
-	private final AlbumRepository albumRepository;
-
-	public AlbumService(MusicianRepository musicianRepository, AlbumRepository albumRepository) {
+	private final ConcurrentMultiMap<String, FluxSink<Musician>> musicianSubscribers = new ConcurrentMultiMap<>();
+	
+	public MusicianService(MusicianRepository musicianRepository) {
 		this.musicianRepository = musicianRepository;
-		this.albumRepository = albumRepository;
 	}
 	
 	/** Query Type */
 	
-	
 	/**
-	 * get album by id
+	 * get musician by id
 	 * 
 	 * @param id
-	 * @return Album
+	 * @return Musician
 	 */
-	@GraphQLQuery(name = "album")
-	public Album getAlbumById(long id) {
-		return albumRepository.findById(id).orElseGet(Album::new);
+	@GraphQLQuery(name = "musician")
+	public Musician musician(long id) {
+		return musicianRepository.findById(id).orElseGet(Musician::new);
 	}
 	
 	/**
-	 * get album list
 	 * 
-	 * @return List<Album>
+	 * get musician list
+	 * 
+	 * @return List<Musician>
 	 */
-	@GraphQLQuery(name = "albums")
-	public List<Album> getAlbumList() {
-		return albumRepository.findAll();
+	@GraphQLQuery(name = "musicians")
+	public List<Musician> musicians() {
+		return musicianRepository.findAll();
 	}
 	
 	
 	/** Mutation Type */
 	
 	/**
+	 * create musician
 	 * 
-	 * save album info
-	 * 
-	 * @param title
-	 * @param releasedYear
-	 * @param musicianId
-	 * @return Album
+	 * @param name
+	 * @param genre
+	 * @return Musician
 	 */
-	@GraphQLMutation(name = "createAlbum")
-	public Album createAlbum(String title, String releasedYear, long musicianId) {
+	@GraphQLMutation(name = "createMusician")
+	public Musician createMusician(String name, String genre) {
+		Musician musician = Musician.builder()
+									.name(name)
+									.genre(genre)
+									.build();
 		
-		Musician musician = musicianRepository.findById(musicianId).orElseGet(Musician::new);
+		// 새로운 뮤지션을 생성한다.
+		Musician newMusician = musicianRepository.save(musician);
 		
-		if(musician.getName() == null) {
-			throw new GraphqlNotFoundException("not found musician by id, it doesn't create album", musicianId);
-		}
-		
-		Album album = Album.builder()
-						   .musician(musician)
-						   .title(title)
-						   .releasedYear(releasedYear)
-						   .build();
-		
-		return albumRepository.save(album);
+		// 새로운 뮤지션이 생성되면 subscriber에 그 정보를 알려준다.
+		musicianSubscribers.get(StatusCode.NEW.code).forEach(subscriber -> subscriber.next(newMusician));
+		return newMusician;
+
 	}
 	
 	/**
 	 * 
-	 * update album
+	 * update musician
 	 * 
 	 * @param id
-	 * @param title
-	 * @param releasedYear
-	 * @return Album
+	 * @param name
+	 * @param genre
+	 * @return Musician
 	 */
-	@GraphQLMutation(name = "updateAlbum")
-	public Album updateAlbum(long id, String title, String releasedYear) {
-		Album album = albumRepository.findById(id).orElseGet(Album::new);
-		
-		if(album.getTitle() == null) {
-			throw new GraphqlNotFoundException("not found album by id, it doesn't update", id);
+	@GraphQLMutation(name = "updateMusician")
+	public Musician updateMusician(long id, String name, String genre) {
+		// id로 뮤지션을 찾아온다.
+		Musician musician = musicianRepository.findById(id).orElseGet(Musician::new);
+		if(musician.getName() == null) {
+			throw new GraphqlNotFoundException("not found musician by id, it doesn't update musician", id);
 		}
-		
 		// dirty checking
-		if(!StringUtils.isEmpty(title)) {
-			album.setTitle(title);
+		if(!StringUtils.isEmpty(name)) {
+			musician.setName(name);
 		}
-		
-		if(!StringUtils.isEmpty(releasedYear)) {
-			album.setReleasedYear(releasedYear);
+
+		if(!StringUtils.isEmpty(genre)) {
+			musician.setGenre(genre);
 		}
-		
-		return album;
+		// 뮤지션 정보가 변경되면 subscriber에 그 정보를 알려준다.
+		musicianSubscribers.get(StatusCode.UPDATE.code).forEach(subscriber -> subscriber.next(musician));
+		return musician;
 	}
-	
+
 	/**
-	 * delete album
+	 * 
+	 * delete musician
 	 * 
 	 * @param id
 	 * @return boolean
 	 */
-	@GraphQLMutation(name = "deleteAlbum")
-	public boolean deleteAlbum(long id) {
-		albumRepository.deleteById(id);
-		return albumRepository.existsById(id);
+	@GraphQLMutation(name = "deleteMusician")
+	public boolean deleteMusician(long id) {
+		musicianRepository.deleteById(id);
+		return musicianRepository.existsById(id);
 	}
+	
+	/**
+	 * 
+	 * 뮤지션이 새로 등록되거나 또는 update될때 해당 정보를 subscription으로 리스닝하고 있는 클라이언트에 해당 정보를 보내주는 역할을 하게 된다.
+	 * 
+	 * code는 new, update로 StatusCode.java를 참조하자.
+	 * 
+	 * @param code
+	 * @return Publisher<Musician>
+	 */
+	@GraphQLSubscription
+    public Publisher<Musician> statusMusician(String code) {
+		return Flux.create(subscriber -> musicianSubscribers.add(code, subscriber.onDispose(() -> musicianSubscribers.remove(code, subscriber))), FluxSink.OverflowStrategy.LATEST);
+    }
 	
 }
 
 
 ```
 
-코드를 보면 기존에 로직을 건드리지 않고 어노테이션만으로 설정하게 되어 있다.
+Sink라는 의미는 보통 싱크대의 그 싱크이다. 달리 말하면 물을 버리는 곳이라고 할 수 있지만 리액티브 프로그래밍이나 또는 스프링 부트의 WebFlux를 다뤄봤다면 이것은 스트림의 데이터 흐름과 연관이 있다는 것을 알수 있다.
 
+뭐 몰라도 대충 물이 싱크대에서 하수구로 빠져나가는 것을 연상해 보자.
 
-해당 클래스에는 @GraphQLApi를 통해서 이 서비스가 GraphQL의 api를 담당하고 있고 마치 스프링의 @GetMapping, @PutMapping처럼 각 메소드에 그에 해당하는 어노테이션을 붙인다.
+그리고 물을 하나의 데이터로 보면 싱크대의 구멍으로 데이터가 흘러들어서 목적지인 하수구까지 흘러가는 것을 생각해 보면 될거 같다.
 
-잠시 스키마를 보자면
+예시가 좀 거시기 했지만 자연스럽게 흘러가게 두는 것이다.
+
+위 코드에 보면 FluxSink의 제너릭 타입이 Musician이다. 결국 
+
 
 ```
-extend type Query {
-	albums: [Album]
-	album(id: ID): Album!
+/**
+	 * 
+	 * 뮤지션이 새로 등록되거나 또는 update될때 해당 정보를 subscription으로 리스닝하고 있는 클라이언트에 해당 정보를 보내주는 역할을 하게 된다.
+	 * 
+	 * code는 new, update로 StatusCode.java를 참조하자.
+	 * 
+	 * @param code
+	 * @return Publisher<Musician>
+	 */
+	@GraphQLSubscription
+    public Publisher<Musician> statusMusician(String code) {
+		return Flux.create(subscriber -> musicianSubscribers.add(code, subscriber.onDispose(() -> musicianSubscribers.remove(code, subscriber))), FluxSink.OverflowStrategy.LATEST);
+    }
+
+```
+
+이 코드는 자연스럽게 구독한 클라이언트의 구독 정보를 가지고 있다가 publisher가 발생하면 Sink를 통해 구독 채널에 있는 클라이언트들에게 Musician정보를 흘려보내겠다고 생각하면 좀 더 쉬울까?
+
+즉 채널을 통해서 정보를 흘려준다고 하면 이해하기 쉬울 수도 있을거 같다. 아닐수도....
+
+사실 이건 스프링 리액터에 대한 공부가 필요하기 때문에 링크로만 대체할 생각이다.
+
+밑에 링크는 아마도 자바 개발자라면 잘 알려진 최범균님의 블로그이다.
+
+[자바캔](https://javacan.tistory.com/entry/Reactor-Start-3-RS-create-stream)
+
+
+대충 이것은 하나의 이야기로 설명해야 하는게 맞을 거 같다.
+
+1. @GraphQLSubscription으로 설정된 엔드포인트로 클라이언트에서 구독을 하게 될것이다.    
+    
+2. 이때 구독을 할때는 code값을 넘길 것이고 이 코드값을 musicianSubscribers에 맵핑할 것이다.     
+   아마도 내부적으로 sessionId같 유니크한 값을 가질것이다.    
+    
+3. 위 코드에 보면 createMusician, updateMusician메소드에서 최종 생성 또는 변경이후에 각 메소드에 따른 코드값을 통해서 구독자의 리스트를 가져온다.    
+    
+4. 그리고 그 구독자들에게 생성 또는 변경된 정보를 흘려준다. 즉 Publish 할것이다.     
+     
+
+암튼 @GraphQLSubscription붙이면 된다. 필드명은 따로 설정하지 않으면 메소드명이 필드명이 된다.
+
+
+## 테스트를 해보자.
+
+일단 [http://localhost:8080/gui](http://localhost:8080/gui)을 4개의 탭으로 각각 열어두자.
+
+그리고 다음과 같이 각 탭에 실행을 한다.
+
+
+```
+
+subscription {
+    statusMusician(code: "new") {
+         id
+    		 name
+         age
+    		 genre
+         albums {
+          title
+          releasedYear
+        }
+    
+    }
 }
 
-extend type Mutation {
-	createAlbum(title: String!, releasedYear: String!, musicianId: Int!): Album
-	updateAlbum(id: ID, title: String!, releasedYear: String!): Album!
-	deleteAlbum(id: ID): Boolean
+
+
+subscription {
+    statusMusician(code: "update") {
+         id
+    		 name
+         age
+    		 genre
+         albums {
+          title
+          releasedYear
+        }
+  
+    }
+}
+
+
+
+subscription {
+    statusAlbum(code: "new") {
+         id
+    		 title
+         releasedYear
+         musician {
+          name
+          age
+          genre
+        }
+    
+    }
+}
+
+
+subscription {
+    statusAlbum(code: "update") {
+         id
+    		 title
+         releasedYear
+         musician {
+          name
+          age
+          genre
+        }
+    
+    }
 }
 
 ```
 
-query에 해당하는 부분은 @GraphQLQuery, mutation에 해당한다면 @GraphQLMutation를 붙이고 그에 맞는 이름을 생성하는 것만으로 설정을 끝내고 있다.
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/graphql-subscription/capture/capture1.png)
 
-이게 전부이다.
+그 중에 이미지 하나를 보자면 다음과 같이 화면에 우측에는 무언가 빙글빙글 돌면서 실행되고 있으며 하단에 'Listening ...'이라는 문구가 보일 것이다.
 
-그러면 엔드포인트를 어떻게 설정할 것이냐?
+해당 채널로 구독을 하고 있다는 의미를 알 수 있다.
 
-application.yml에 할 수 있다.
+자 그럼 이제 실제 뮤지션을 생성하면 어떻게 되는지 확인해 보자.
+
+요청 쿼리는 Postman으로 테스트했다.
+
+테스트 이미지에서는 Body -> raw -> json을 선택해서 테스트했는데 기존의 브랜치에서 했던 방식으로 해도 상관없다.
+
+원래 html을 통해서 websocket통신을 해볼까 해서 테스트를 준비중에 귀찮아서 방향을 급선회했기 때문이다.
 
 
 ```
-graphql:
-  spqr:
-    http:
-      enabled: true
-      endpoint: /music
-    gui:
-      enabled: true
+{"query": "mutation { createMusician(name:\"Charlie Parker\", genre:\"jazz\") { name genre } }" }
+
 ```
 
-graphql.sqpr.http.endpoint에 원하는 path를 설정하면 된다. 설정하지 않으면 기본 /graphql이다.
+다음과 같이 한번 날려보자.
 
-밑에 gui는 부분이 있는데 이부분은 난중에 테스트시 설명을 하겠다.
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/graphql-subscription/capture/capture2.png)
 
+예상대로 뮤지션의 정보가 생성되었다.
 
-## API Call
+자 그럼 웹 ide에서는 무슨일이?
 
-use-resolver 브랜치에서 했던 방식으로 Postman에서 테스트를 하면 된다.
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/graphql-subscription/capture/capture3.png)
 
-하지만 위에 graphql.sqpr.gui설정을 통해서 웹 ide로 테스트를 해볼까 한다.
+구독한 정보가 우측에 나타났다.
 
-내부적으로 제공하는 이 ide는 기본 접속 url이 존재한다.
+그럼 새로운 뮤지션을 한번 더 넣어볼까?
 
-[http://localhost:8080/gui](http://localhost:8080/gui)
+```
+{"query": "mutation { createMusician(name:\"John Coltrne\", genre:\"jazz\") { name genre } }" }
 
-하지만 저 뒤의 /gui 패스 역시 설정을 할 수 있다.
+```
 
-이 프로젝트에서는 기본 설정을 하지 않았지만 바꾸고 싶다면 graphql.sqpr.gui.endpoint=/blah 처럼 설정하면 된다.
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/graphql-subscription/capture/capture4.png)
 
-다만 이것을 통해서 테스트시에는 콘솔 로그를 확인하기가 너무 어렵다. 
+오~~~ 제대로 작동한다.
 
-주기적으로 통신을 하면서 로그를 남기고 있어서인데 이 로그를 없앴 수 있는 설정이 있는지 찾아 보고 있는중...
-
-## Schema 확인하기
-
-자 그럼 위 gui주소로 들어가면 이미지처럼 우측 중간에 2개의 탭을 볼 수 있다. 그 중에 Schema를 클릭하면 설정한 스키마 정보를 보여준다.
+어? 근데 이름을 잘못 넣었다. John Coltrane인데 오타가 났으니 수정을 해야한다.
 
 
-![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/using-annotation/capture/capture1.png)
+```
+{"query": "mutation { updateMusician(id:2, name:\"John Coltrane\") { name genre } }" }
+```
+
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/graphql-subscription/capture/capture5.png)
+
+위에서 처럼 업데이트를 했다.
+
+이제는 code값을 'update'로 넘겨서 업데이트에 대한 구독을 요청했던 탭을 한번 보자.
 
 
-물론 DOCS로 보는 것이 편할 수도 있다.
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/graphql-subscription/capture/capture6.png)
+
+실수로 오타난 이름으로 한번 업데이트해서 이미지처럼 나왔는데 업데이트가 될 때마다 구독하고 있다 서버에서 publish가 발생하면 정보를 받고 있다는 것을 알 수 있다.
 
 
-![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/using-annotation/capture/capture2.png)
+이제는 앨범을 한번 새로 등록을 해보자
+
+```
+{"query" : "mutation { createAlbum(title:\"With Strign\", releasedYear:\"1950\", musicianId:1) { title } }" }
+
+mutation { 
+    createAlbum(title:"Lush Life", releasedYear:"1961", musicianId:2) { 
+        title 
+        
+    } 
+    
+}
+
+```
+
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/graphql-subscription/capture/capture7.png)
 
 
-그럼 실제로 이전처럼 했을떄와 같이 작동하는지 확인해보자.
 
-기존과 같이 작동하기때문에 다른건 다 생략하고 이미지로 대체를 할까 한다.
+이제는 웹 ide를 확인해 보자.
 
-테스트 순서는 다음과 같다.
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/graphql-subscription/capture/capture8.png)
 
-1. 뮤지션 정보 생성
-2. 뮤지션의 앨범 생성
-3. 뮤지션 정보만 가져오기
-4. 뮤지션의 정보와 앨범 정보까지 가져오기
-5. 앨범 정보도 뮤지션과 마찬가지
+예상대로 잘 되었다.
+
+하지만 어라 음반명이 오타가 났으니 또 업데이트로 제대로 그 부분도 잘되고 있는지 확인해 보자.
 
 
-![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/using-annotation/capture/capture3.png)
-1. 뮤지션 정보 생성
+With Strign ->에서 With String으로 업데이트를 하자.
+
+```
+{"query": "mutation { updateAlbum(id:3, title:\"With String\") { title } }" }
+```
+
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/graphql-subscription/capture/capture9.png)
 
 
-![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/using-annotation/capture/capture4.png)
-2. 뮤지션의 앨범 생성
+gui로 보면 구독 채널을 통해서 수정된 정보를 받았다는 것을 확인할 수 있다.
 
+![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/graphql-subscription/capture/capture10.png)
 
-![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/using-annotation/capture/capture5.png)
-3. 뮤지션 정보만 가져오기
-
-
-![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/using-annotation/capture/capture6.png)
-4. 뮤지션의 정보와 앨범 정보까지 가져오기
-
-
-![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/using-annotation/capture/capture7.png)
-5. 앨범 정보만 가져오기
-
-
-![실행이미지](https://github.com/basquiat78/graphql-springboot2/blob/using-annotation/capture/capture8.png)
-6. 앨범 정보와 뮤지션 정보까지 가져오기
 
 
 ## At A Glance
 
-[graphql-spqr-spring-boot-starter](https://github.com/leangen/graphql-spqr-spring-boot-starter)
+지금까지 GraphQL과 관련된 테스트 코드를 작성하고 테스트를 하면서 생각이 드는 고민은 과연 프론트쪽에서 어떻게 이 부분을 처리해야 하는지에 대한 것이다.
 
-해당 깃헙에는 커스텀 관련 정보도 있고 많은 내용들이 있는데 우선 기본적인 예제에만 초점을 맞추고 진행했다.
+아직 프론트를 작성해서 테스트 한것이 아니고 툴을 이용한 테스트 방식이라서 감이 안온다.
 
-커스텀 부분은 천천히 진행해 보고자 한다.
+시간이 되면 그 부분도 진행해 볼까 한다.
 
-이 방법은 어노테이션을 이용한 방식이기때문에 작성하기가 쉽고, 스키마 작성에 대한 고민을 할 필요가 없다.
+어째든 Subscription의 작동 방식도 상당히 유용하다.
 
-또한 기존의 스프링 부트로 작성된 로직을 거의 손을 대지 않고 변환할 수 있다는 장점도 크게 작용한다. 
-
-다만 아직은 완전한 버전이 아닌 알파 버전으로 변경시 생길 수 있는 사이드 이펙트에 대해서는 감안하고 사용해야한다는 점이 살짝 불안하다.
-
-웹용 브라우저 ide를 통해서 스키마를 확인할 수 있지만 적어도 모델/엔티티 디자인 타임에서는 최소한 스키마에 대한 이해가 좀 필요한 부분도 있다.
 

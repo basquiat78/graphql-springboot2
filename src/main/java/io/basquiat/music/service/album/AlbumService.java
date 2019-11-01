@@ -4,17 +4,23 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import org.reactivestreams.Publisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import io.basquiat.exception.GraphqlNotFoundException;
+import io.basquiat.music.code.StatusCode;
 import io.basquiat.music.models.Album;
 import io.basquiat.music.models.Musician;
 import io.basquiat.music.repo.AlbumRepository;
 import io.basquiat.music.repo.MusicianRepository;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLSubscription;
 import io.leangen.graphql.spqr.spring.annotations.GraphQLApi;
+import io.leangen.graphql.spqr.spring.util.ConcurrentMultiMap;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 
 @Service("albumService")
 @GraphQLApi
@@ -25,6 +31,8 @@ public class AlbumService {
 
 	private final AlbumRepository albumRepository;
 
+	private final ConcurrentMultiMap<String, FluxSink<Album>> albumSubscribers = new ConcurrentMultiMap<>();
+	
 	public AlbumService(MusicianRepository musicianRepository, AlbumRepository albumRepository) {
 		this.musicianRepository = musicianRepository;
 		this.albumRepository = albumRepository;
@@ -81,7 +89,10 @@ public class AlbumService {
 						   .releasedYear(releasedYear)
 						   .build();
 		
-		return albumRepository.save(album);
+		Album newAlbum = albumRepository.save(album);
+		// 새로운 앨범이 생성되면 subscriber에 그 정보를 알려준다.
+		albumSubscribers.get(StatusCode.NEW.code).forEach(subscriber -> subscriber.next(newAlbum));
+		return newAlbum;
 	}
 	
 	/**
@@ -110,6 +121,8 @@ public class AlbumService {
 			album.setReleasedYear(releasedYear);
 		}
 		
+		// 앨범 정보가 변경되면 subscriber에 그 정보를 알려준다.
+		albumSubscribers.get(StatusCode.UPDATE.code).forEach(subscriber -> subscriber.next(album));
 		return album;
 	}
 	
@@ -124,5 +137,19 @@ public class AlbumService {
 		albumRepository.deleteById(id);
 		return albumRepository.existsById(id);
 	}
+	
+	/**
+	 * 
+	 * 앨범이 새로 등록되거나 또는 update될때 해당 정보를 subscription으로 리스닝하고 있는 클라이언트에 해당 정보를 보내주는 역할을 하게 된다.
+	 * 
+	 * code는 new, update로 StatusCode.java를 참조하자.
+	 * 
+	 * @param code
+	 * @return Publisher<Album>
+	 */
+	@GraphQLSubscription
+    public Publisher<Album> statusAlbum(String code) {
+		return Flux.create(subscriber -> albumSubscribers.add(code, subscriber.onDispose(() -> albumSubscribers.remove(code, subscriber))), FluxSink.OverflowStrategy.LATEST);
+    }
 	
 }
