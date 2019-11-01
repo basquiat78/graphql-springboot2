@@ -136,5 +136,5 @@ Spring boot와 관련 정보를 찾다 보니 3가지 방식으로 구현할 수
 
 [using-annotation](https://github.com/basquiat78/graphql-springboot2/tree/using-annotation)
 
-[graphql-subscription Subscription 구]
+[graphql-subscription Subscription 구현]
 (https://github.com/basquiat78/graphql-springboot2/tree/graphql-subscription)
