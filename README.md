@@ -138,3 +138,118 @@ Spring boot와 관련 정보를 찾다 보니 3가지 방식으로 구현할 수
 
 [graphql-subscription Subscription 구현]
 (https://github.com/basquiat78/graphql-springboot2/tree/graphql-subscription)
+
+# At A Glance  
+
+간만에 graphGL을 할 일이 있어서 작년에 작성했던 이 글을 보니 오류가 상당하다.
+
+일단 Entity는 롬복을 썼을 때 하지 말아야 하는 어노테이션을 죄다 붙여놨다. ~~이러지 말자~~
+
+또한 Resolver를 활용하게 될 경우에는 JPA에서 추구하는 객체 지향적인 설계보다 오히려 DB관점에서의 코드가 있다.
+
+예를 들면 
+
+```
+package io.basquiat.music.models;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+
+/**
+ * 
+ * Musician Entity
+ * 
+ * created by basquiat
+ *
+ */
+@Builder
+@Data
+@AllArgsConstructor
+@RequiredArgsConstructor
+@Entity
+@Table(name = "musician")
+public class Musician {
+
+	/** 뮤지션 유니크 아이디 */
+	@Id
+	@GeneratedValue(strategy= GenerationType.AUTO)
+	private long id;
+	
+	/** 뮤지션 이름 */
+	private String name;
+	
+	/** 뮤지션 나이 */
+	private int age;
+	
+	/** 뮤지션의 주요 음악 장르 */
+	private String genre;
+
+}
+
+```
+
+```
+package io.basquiat.music.models;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+
+/**
+ * 
+ * Album Entity
+ * 
+ * created by basquiat
+ *
+ */
+@Builder
+@Data
+@AllArgsConstructor
+@RequiredArgsConstructor
+@Entity
+@Table(name = "album")
+public class Album {
+
+	/** 앨범 아이디 */
+	@Id
+	@GeneratedValue(strategy= GenerationType.AUTO)
+	private long id;
+	
+	/** 음반 명 */
+	private String title;
+
+	/** 릴리즈된 년도 */
+	@Column(name = "released_year")
+	private String releasedYear;
+
+	/** 해당 앨범의 뮤지션 아이 */
+	@Column(name = "musician_id")
+	private long musicianId;
+	
+}
+
+```
+
+뭔가 느낌이 오지 않나? Album 객체를 보게 되면  musicianId를 필드로 갖게 된다.
+
+DB의 ERD를 보고 이것을 사용하게 되면 이렇게 DB 관점에서 엔티티를 설계하게 되는 것이다.
+
+그렇다면 의문점이 든다. Resolver를 써야 하는 것인가 말아야 하는 것인가?
+
+나의 개인적인 입장이라면 기왕 OOP세상과 ORM에서 허우적되겠다고 맘먹은 이상 이 방법보다는 JPA의 객체지향적인 설계를 통해서 작성하게 될거 같다.
